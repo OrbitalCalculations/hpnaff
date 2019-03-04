@@ -183,12 +183,12 @@ extension la_object_t {
 public extension la_object_t {
 	
 	/// Convenience accessor for row count
-	public var rows: Int {
+	var rows: Int {
 		return Int(la_matrix_rows(self))
 	}
 
 	/// Convenience accessor for column count
-	public var cols: Int {
+	var cols: Int {
 		return Int(la_matrix_cols(self))
 	}
 
@@ -199,7 +199,7 @@ public extension la_object_t {
 	
 	:returns: The merged matrix
 	*/
-	public func prependColumnsFrom(_ secondMat: la_object_t) -> la_object_t {
+	func prependColumnsFrom(_ secondMat: la_object_t) -> la_object_t {
 		return secondMat.appendColumnsFrom(self)
 	}
 	
@@ -210,7 +210,7 @@ public extension la_object_t {
 	
 	:returns: The merged matrix
 	*/
-	public func appendColumnsFrom(_ secondMat: la_object_t) -> la_object_t {
+	func appendColumnsFrom(_ secondMat: la_object_t) -> la_object_t {
 		
 		assert(self.rows == secondMat.rows, "Cannot append columns from matrices of two different row dimensions")
 		
@@ -232,7 +232,7 @@ public extension la_object_t {
 	*
 	*  @return A new la_object_t instance with the subset of the original object from the specified rows and columns
 	*/
-    public subscript(rowRange: Range<Int>, colRange: Range<Int>) -> la_object_t {
+	subscript(rowRange: Range<Int>, colRange: Range<Int>) -> la_object_t {
 		return la_matrix_slice(self, rowRange.lowerBound, colRange.lowerBound, 0, 0, la_count_t(rowRange.upperBound - rowRange.lowerBound), la_count_t(colRange.upperBound - colRange.lowerBound))
 	}
 	
@@ -241,7 +241,7 @@ public extension la_object_t {
 	
 	:returns: A one dimensional swift array with all the elements from the la_object_t instance
 	*/
-    public func toArray() -> [Double] {
+	func toArray() -> [Double] {
 		var array = [Double](repeating: 0.0, count: rows * cols)
 		
 		let status = la_matrix_to_double_buffer(&array, la_count_t(cols), self)
@@ -251,7 +251,7 @@ public extension la_object_t {
 		return array
 	}
     
-    public subscript(x: Int, y: Int) -> Double? {
+	subscript(x: Int, y: Int) -> Double? {
         if x >= 0 && x < rows && y >= 0 && y < cols {
             let slice = la_matrix_slice(self, x, y, 0, 0, 1, 1)
             return slice.toArray().first
