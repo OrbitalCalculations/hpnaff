@@ -15,7 +15,7 @@ import Rainbow
 
 let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
 let version2 = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "unknown"
-hpNAFFLog(("Welcome to hpNAFF Analysis".green.bold + "(version \(version.red), build \(version2.red)).").blue.bold + " ©2018 Heiko Pälike. 3rd party licenses: see --licenses option")
+hpNAFFLog(("Welcome to hpNAFF Analysis".green.bold + "(version \(version.red), build \(version2.red)).").blue.bold + " ©2015-2019 Heiko Pälike. 3rd party licenses: see --licenses option")
 
 // MARK: Defaults
 let kDecimate = 1
@@ -103,7 +103,7 @@ if help_option.wasSet {
 }
 
 if version_option.wasSet {
-	print("hpNAFF (version \(version.red), build \(version2.red)) ©2018 Heiko Pälike. 3rd party licenses: see --licenses option")
+	print("hpNAFF (version \(version.red), build \(version2.red)) ©2015-2019 Heiko Pälike. 3rd party licenses: see --licenses option")
 	exit(0)
 }
 
