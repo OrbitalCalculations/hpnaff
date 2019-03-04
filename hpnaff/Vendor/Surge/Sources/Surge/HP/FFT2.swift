@@ -440,7 +440,9 @@ private func fftPlanC(_ count: Int, direction: vDSP_DFT_Direction = .FORWARD) ->
         result =  vDSP_DFT_zop_CreateSetupD(nil, vDSP_Length(count), .FORWARD)
     case .INVERSE:
         result = vDSP_DFT_zop_CreateSetupD(nil, vDSP_Length(count), .INVERSE)
-    }
+	@unknown default:
+		fatalError()
+	}
     assert(result != nil, "FFT Plan Failed")
     return result!
 }
@@ -452,7 +454,9 @@ private func fftPlanR(_ count: Int, direction: vDSP_DFT_Direction = .FORWARD) ->
         result =  vDSP_DFT_zrop_CreateSetupD(nil, vDSP_Length(count), .FORWARD)
     case .INVERSE:
         result = vDSP_DFT_zrop_CreateSetupD(nil, vDSP_Length(count), .INVERSE)
-    }
+	@unknown default:
+		fatalError()
+	}
     assert(result != nil, "FFT Plan Failed")
     return result!
 }
@@ -486,7 +490,9 @@ public func complexfft(_ input: [DSPDoubleComplex], weights inputweights: vDSP_D
         result =  zip(real,imag).compactMap{DSPDoubleComplex(real: $0, imag: $1)}
     case .INVERSE:
         result = zip(real,imag).compactMap{DSPDoubleComplex(real: $0/Double(dftLength), imag: $1/Double(dftLength))}
-    }
+	@unknown default:
+		fatalError()
+	}
     
     if inputweights == nil {
         vDSP_DFT_DestroySetupD(weights)
