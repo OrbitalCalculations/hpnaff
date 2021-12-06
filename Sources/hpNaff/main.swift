@@ -334,8 +334,8 @@ if (complex == true) { cplxdata =  Array(cplxdata[lowerIndex...upperIndex]) }
 if detrendChunks == false {
 	if let detrendOrder = detrending_option.value {
 		if (complex == true) {
-      let (realresult,realcoefficients) =  (data, [1.0]) //TODO: implement detrend(data, degree: detrendOrder)//detrend(real: data, imag: cplxdata, degree: detrendOrder)
-      let (imagresult,imagcoefficients) =  (data, [1.0]) //TODO: implement detrend(cplxdata, degree: detrendOrder)//detrend(real: data, imag: cplxdata, degree: detrendOrder)
+      let (realresult, realcoefficients) =  detrend(data, degree: detrendOrder)//detrend(real: data, imag: cplxdata, degree: detrendOrder)
+      let (imagresult, imagcoefficients) =  detrend(cplxdata, degree: detrendOrder)
 			
 			data = realresult
 			cplxdata = imagresult
@@ -344,8 +344,8 @@ if detrendChunks == false {
 			
 		}
 		else {
-			let (detrendedSignal, coefficients) = (data, [1.0]) //TODO: implement detrend(data, degree: detrendOrder)
-			hpNAFFLog("Detrending coefficients order (high to low) \(detrendOrder) : \(coefficients)", messageKind: .info, verbosity: verbosity.value)
+      let (detrendedSignal, coefficients) = detrend(data, degree: detrendOrder)
+      hpNAFFLog("Detrending coefficients order (high to low) \(detrendOrder) : \(Array(coefficients.reversed()))", messageKind: .info, verbosity: verbosity.value)
 			data = detrendedSignal
 		}
 		//        let signal_to_detrend = complex ? zip(data,cplxdata).map{hypot($0.0,$0.1)} : data
@@ -400,16 +400,6 @@ if (complex == true) {
 let numberChunks = dataArrays.count
 
 let maxSize = dataArrays.map{ $0.count }.max() ?? 0
-var weights: [Double] //vDSP_DFT_SetupD?
-
-
-let realweights = [Double]() //TODO: vDSP_DFT_zrop_CreateSetupD(nil, vDSP_Length(maxSize), .FORWARD)
-let cplxWeights = [Double]() //TODO: vDSP_DFT_zop_CreateSetupD(weights, vDSP_Length(maxSize), .FORWARD)
-if (complex == true) {
-	weights = cplxWeights
-} else {
-	weights = realweights
-}
 
 for chunk in 0..<numberChunks {
 	var localData : [Double] = []
@@ -419,13 +409,13 @@ for chunk in 0..<numberChunks {
 		if (detrendOrder == nil) {
 			hpNAFFLog("Detrending coefficients order not set, using default of 0", messageKind: .warn, verbosity: verbosity.value)
 		}
-    let (detrendedSignal, coefficients) = (dataArrays[chunk],[1.0]) //TODO: implement detrend(dataArrays[chunk], degree: detrendOrder ?? 0)
-		hpNAFFLog("Chunk #\(chunk), detrending coefficients order \(detrendOrder ?? 0) : \(coefficients)", messageKind: .info, verbosity: verbosity.value)
+    let (detrendedSignal, coefficients) = detrend(dataArrays[chunk], degree: detrendOrder ?? 0)
+    hpNAFFLog("Chunk #\(chunk), detrending coefficients order \(detrendOrder ?? 0) : \(Array(coefficients.reversed()))", messageKind: .info, verbosity: verbosity.value)
 		localData = detrendedSignal
 		localCplxData = detrendedSignal
 		if (complex == true) {
-      let (detrendedImagSignal, imagCoefficients) = (cplxDataArrays[chunk], [1.0]) //TODO: detrend(cplxDataArrays[chunk], degree: detrendOrder ?? 0)
-			hpNAFFLog("Chunk #\(chunk), detrending coefficients (IMAG) order \(detrendOrder ?? 0) : \(imagCoefficients)", messageKind: .info, verbosity: verbosity.value)
+      let (detrendedImagSignal, imagCoefficients) = detrend(cplxDataArrays[chunk], degree: detrendOrder ?? 0)
+      hpNAFFLog("Chunk #\(chunk), detrending coefficients (IMAG) order \(detrendOrder ?? 0) : \(imagCoefficients.reversed())", messageKind: .info, verbosity: verbosity.value)
 			localCplxData = detrendedImagSignal
 		}
 	} else {
@@ -447,12 +437,12 @@ for chunk in 0..<numberChunks {
 	}
 	let dt = deltaT
 	
-	let result = performNAFF(data: localData, cplxData: localCplxData, dt: dt, nfreqs: maxFrequencies, t0: t0, maxFrequencies: maxFrequencies, fracRMSChangeLimit: fracRMSChangeLimit, freqCycleLimit: freqCycleLimit, fracFreqAccuracyLimit: fracFreqAccuracyLimit, lowerFreqLimit: lowerFreqLimit, upperFreqLimit: upperFreqLimit, weights: weights, complex: complex)
+	let result = performNAFF(data: localData, cplxData: localCplxData, dt: dt, nfreqs: maxFrequencies, t0: t0, maxFrequencies: maxFrequencies, fracRMSChangeLimit: fracRMSChangeLimit, freqCycleLimit: freqCycleLimit, fracFreqAccuracyLimit: fracFreqAccuracyLimit, lowerFreqLimit: lowerFreqLimit, upperFreqLimit: upperFreqLimit, complex: complex)
 	let (freq,ampl,phase,sig) = result
 	
 	let count = freq.count
 	//let headerstr = ["    #","chunk","      t0      ","points","   frequency","    amplitude","       phase","significance", "period"].joined(separator: " | ").blue
-	let headerstr1 = ["    #","chunk","      t0      ","points","   frequency","    amplitude","       phase","significance", "      period","   arcsec/yr"," phase (deg)"].joined(separator: " | ")
+	let headerstr1 = ["    #","chunk","      t0      ","points","   frequency","    amplitude","       phase","significance", "        period","   arcsec/yr"," phase (deg)"].joined(separator: " | ")
 	let headerstr = headerstr1.blue
 	
 	
@@ -473,7 +463,7 @@ for chunk in 0..<numberChunks {
 		let a = String(format:"%  13.8f",ampl[indices[i]])
 		let p = String(format:"% 011.9f",phase[indices[i]])
 		let s = String(format:"% 011.9f",sig[indices[i]])
-		let per = String(format:"% 12.7f",1.0/freq[indices[i]])
+		let per = String(format:"% 14.8f",1.0/freq[indices[i]])
 		let arcsec = String(format:"% 12.7f",360.0*3.600*freq[indices[i]])
 		let pdeg = String(format:"% 12.7f",phase[indices[i]]*180.0/Double.pi)
 		

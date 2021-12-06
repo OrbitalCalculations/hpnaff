@@ -24,8 +24,11 @@ let package = Package(
               "Rainbow", /*"Surge",*/
               .product(name: "DoggieMath", package: "Doggie"),
               .product(name: "Numerics", package: "swift-numerics"),
-
-            ]),
+            ],
+            resources: [
+              .process("Resources")
+            ]
+        ),
         .testTarget(
             name: "hpNaffTests",
             dependencies: ["hpNaff"]),
