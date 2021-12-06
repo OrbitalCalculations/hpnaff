@@ -22,16 +22,21 @@ extension Array where Element: Real {
   }
 }
 
-extension Real {
+extension Array where Element: Real {
   @inlinable
-  public func svesq(_ arg: [Double]) -> [Double] {
-    let sq = arg.squared()
-    let result = sq.sum()
-    return result
+  public func sum() -> Self.Element {
+    return self.reduce(0, +)
   }
 }
 
-@inlinable
+
+extension Real {
+  @inlinable
+  public func svesq(_ arg: [Double]) -> Double {
+    return arg.reduce(0.0, {$0 + $1*$1})
+  }
+}
+
 @inlinable
 public func sincos(_ arg: [Double]) -> ([Double], [Double]) {
   let sine = arg.map(sin)
@@ -39,24 +44,25 @@ public func sincos(_ arg: [Double]) -> ([Double], [Double]) {
   return (sine, cosine)
 }
 
-func NAFFFunc(NAFFData : [Double], NAFFdt: Double, omega: Double)->Double{
+func NAFFFunc(NAFFData : [Double], NAFFdt: Double, omega: Double) -> Double {
 	let range = 0 ..< NAFFData.count
   let omegaterm = range.map { Double($0)*omega*NAFFdt }
 	let (sine, cosine) = sincos(omegaterm)
-  let sum1 = (cosine * NAFFData).sum()
-  let sum2 = (sine * NAFFData).sum()
-  return sum1.squared() + sum2.squared()
+  let sum1 = zip(cosine, NAFFData).reduce(0, {$0 + $1.0*$1.1})
+  let sum2 = zip(sine, NAFFData).reduce(0, {$0 + $1.0*$1.1})
+  return sum1 * sum1 + sum2 * sum2
 }
 
 
-func NAFFFunc2(NAFFData : [Double], NAFFCplxData : [Double], NAFFdt: Double, omega: Double)->Double{
+func NAFFFunc2(NAFFData : [Double], NAFFCplxData : [Double], NAFFdt: Double, omega: Double) -> Double {
 	let range = 0..<NAFFData.count
   let omegaterm = range.map { Double($0)*omega*NAFFdt }
   let (sine, cosine) = sincos(omegaterm)
-  let sum1 = (cosine * NAFFData).sum() + (sine * NAFFCplxData).sum() //real
-  let sum2 = (cosine * NAFFCplxData).sum() - (sine * NAFFData).sum() //imag
-  let result = sum1.squared() + sum2.squared()
-	return result
+  var sum1: Double = zip(cosine, NAFFData).reduce(0, {$0 + $1.0*$1.1})
+  sum1 += zip(sine, NAFFCplxData).reduce(0, {$0 + $1.0*$1.1}) //real
+  var sum2: Double = zip(cosine, NAFFCplxData).reduce(0, {$0 + $1.0*$1.1})
+  sum2 -= zip(sine, NAFFData).reduce(0, {$0 + $1.0*$1.1})  //imag
+  return sum1 * sum1 + sum2 * sum2
 }
 
 public func sqr(x: Int)->Int{
@@ -124,22 +130,22 @@ func CalculatePhaseAndAmplitudeFromFreq(
   let sincosarg = range.map {Double($0) * freq0 * dt}
 	let (sine, cosine) = sincos(sincosarg)
 
-  let sum_ee1 = (sqrt(cosine) * hanning).sum()
-  let sum_ee2 = (sqrt(  sine) * hanning).sum()
+  let sum_ee1 = zip(cosine, hanning).reduce(0.0, {$0 + $1.0*$1.0*$1.1})
+  let sum_ee2 = zip(  sine, hanning).reduce(0.0, {$0 + $1.0*$1.0*$1.1})
   
-      /* these are the overlap sums */
-  let sum_ef1 = (cosine * data).sum()
-  let sum_efs = (sine   * data).sum()
+  /* these are the overlap sums */
+  let sum_ef1 = zip(cosine, data).reduce(0.0, {$0 + $1.0*$1.1})
+  let sum_ef2 = zip(  sine, data).reduce(0.0, {$0 + $1.0*$1.1})
 	
-	let sum1 = svesq(data) //Accelerate/Surge
+  let sum1 = data.reduce(0.0, {$0 + $1*$1})// svesq(data) //Accelerate/Surge
     //    NAFFData[i] -= (sum_ef1/sum_ee1*cosine[i] + sum_ef2/sum_ee2*sine[i])*hanning[i];
 
-      let term1 = cosine .* (sum_ef1/sum_ee1) //vsmul(cosine, sum_ef1/sum_ee1) //Accelerate/Surge
-	let term2 = sine   * (sum_ef2/sum_ee2) //vsmul(sine, sum_ef2/sum_ee2) //Accelerate/Surge
-	let term = (term1 + term2) * hanning // mul(add(term1, term2), hanning) //Accelerate/Surge
-	let newData = data - term //sub(data, term) //Accelerate/Surge
+  let term1 = zip(cosine, hanning).lazy.map {$0 * sum_ef1/sum_ee1 * $1}
+  let term2 = zip(  sine, hanning).lazy.map {$0 * sum_ef2/sum_ee2 * $1 }
+  let term = zip(term1, term2).lazy.map{$0 + $1}
+  let newData = zip(data, term).map{$0 - $1} //sub(data, term) //Accelerate/Surge
 	
-	let sum2 = svesq(newData) //Accelerate/Surge
+	let sum2 = newData.reduce(0.0, {$0 + $1*$1})
 	
 	let significance = (sum1>0.0) ? (sum2/sum1) : (-1.0)
 	
@@ -171,28 +177,34 @@ func CalculatePhaseAndAmplitudeFromFreqCplx2(hanning: [Double], real: [Double], 
 	let (sine, cosine) = sincos(sincosarg) //Accelerate/Surge
 
 	/* this gives normalization of the overlap sums */
-  let sum_ee1 = (sqrt(cosine) * hanning).sum() //sum(mul(sqr(cosine),hanning)) //Accelerate/Surge
-	let sum_ee2 = (sqrt(sine  ) * hanning).sum() //sum(mul(sqr(sine), hanning)) //Accelerate/Surge
+  let sum_ee1 = zip(cosine, hanning).reduce(0, {$0 + $1.0*$1.0*$1.1})
+	let sum_ee2 = zip(  sine, hanning).reduce(0, {$0 + $1.0*$1.0*$1.1})
 	
-  let sum_ef1 = (cosine * real).sum() + (sine * imag).sum()
-  let sum_ef2 = (cosine * imag).sum() - (sine * real).sum()
+  var sum_ef1 = zip(cosine, real).reduce(0, {$0 + $1.0*$1.1})
+  sum_ef1 +=    zip(  sine, imag).reduce(0, {$0 + $1.0*$1.1})
+  var sum_ef2 = zip(cosine, imag).reduce(0, {$0 + $1.0*$1.1})
+  sum_ef2 -=    zip(  sine, real).reduce(0, {$0 + $1.0*$1.1})
+  
 	//let sum_ef1 = sum(mul(cosine, real)) + sum(mul(sine, imag))
 	//let sum_ef2 = sum(mul(cosine, imag)) - sum(mul(sine, real))
 	
-	let sum1 = (svesq(real)+svesq(imag)) //Accelerate/Surge
+  let sum1 = zip(real, imag).reduce(0.0, {$0 + $1.0*$1.0 + $1.1*$1.1})
+
+  //(svesq(real)+svesq(imag)) //Accelerate/Surge
 	//    NAFFData[i] -= (sum_ef1/sum_ee1*cosine[i] + sum_ef2/sum_ee2*sine[i])*hanning[i];
 	
-  let term1 = cosine * (sum_ef1/sum_ee1) + sine * (sum_ef1/sum_ee1)
-  let term2 = cosine * (sum_ef2/sum_ee2) - sine * (sum_ef2/sum_ee2)
+  let term1 = zip(cosine, sine).map {$0 * (sum_ef1/sum_ee1) + $1 * (sum_ef1/sum_ee1)}
+  let term2 = zip(cosine, sine).map {$0 * (sum_ef2/sum_ee2) - $1 * (sum_ef2/sum_ee2)}
 
 	//let term1 = add(vsmul(cosine, sum_ef1/sum_ee1),vsmul(sine, sum_ef1/sum_ee2)) //Accelerate/Surge
 	//let term2 = sub(vsmul(cosine, sum_ef2/sum_ee2),vsmul(sine, sum_ef2/sum_ee2)) //Accelerate/Surge
-	let term1win = term1 * hanning //mul(term1,hanning)
-	let term2win = term2 * hanning //mul(term2,hanning)
-	let newReal = real - term1win //Accelerate/Surge
-	let newImag = imag - term2win //Accelerate/Surge
+  let term1win = zip(term1, hanning).map{$0 * $1}
+  let term2win = zip(term2, hanning).map{$0 * $1}
+
+  let newReal = zip(real, term1win).map { $0 - $1}
+  let newImag = zip(imag, term2win).map { $0 - $1}
 	
-	let sum2 = (svesq(newReal)+svesq(newImag)) //Accelerate/Surge
+	let sum2 = zip(newReal, newImag).reduce(0.0, {$0 + $1.0*$1.0 + $1.1*$1.1}) //Accelerate/Surge
 	
 	let significance = (sum1>0.0) ? (sum2/sum1) : (-1.0)
 	
@@ -226,40 +238,27 @@ func CalculatePhaseAndAmplitudeFromFreqCplx(hanning: [Double], real: [Double], i
     let range = 0..<nPoints
     let sincosarg = range.map {Double($0) * 1.0 * freq0 * dt}
     let (sine, cosine) = sincos(sincosarg) //Accelerate/Surge
-    //    sum_ee1 += sqr(cosine[i])*hanning[i];
-    // sum_ee2 += sqr(sine[i])*hanning[i];
     /* this gives normalization of the overlap sums */
-    let sum_ee1 = sum(mul(sqr(cosine),hanning)) //Accelerate/Surge
-    let sum_ee2 = sum(mul(sqr(sine), hanning)) //Accelerate/Surge
+    let sum_ee1 = zip(cosine, hanning).reduce(0.0, {$0 + $1.0*$1.0*$1.1})
+    let sum_ee2 = zip(  sine, hanning).reduce(0.0, {$0 + $1.0*$1.0*$1.1})
     /* these are the overlap sums */
-	let sum_ef1_r = sum(mul(cosine, real))
-	let sum_ef2_r = sum(mul(sine, real))
-	let sum_ef1_i = sum(mul(cosine, imag))
-	let sum_ef2_i = sum(mul(sine, imag))
+    let sum_ef1_r = zip(cosine, real).reduce(0.0, {$1.0*$1.1})
+	  let sum_ef2_r = zip(  sine, real).reduce(0.0, {$1.0*$1.1})
+	  let sum_ef1_i = zip(cosine, imag).reduce(0.0, {$1.0*$1.1})
+	  let sum_ef2_i = zip(  sine, imag).reduce(0.0, {$1.0*$1.1})
 	
-//	let sum_ef1b = sum(add(mul(cosine, real),mul(sine, imag)))
-//	let sum_ef2b = sum(sub(mul(cosine, imag),mul(sine, real)))
+    let sum1 = zip(real, imag).reduce(0.0, {$0 + $1.0*$1.0 + $1.1*$1.1})
 
-	
-//    let sum_ef1 = (sum_ef1_r + sum_ef2_i)//Accelerate/Surge
-//    let sum_ef2 = (sum_ef1_i + sum_ef2_r) //+  sum(mul(cosine, imag)))//Accelerate/Surge
-    //let sum_ef1 = sum(mul(cosine, real)) //Accelerate/Surge
-    //let sum_ef2 = sum(mul(sine, imag)) //Accelerate/Surge
-    let sum1 = (svesq(real)+svesq(imag)) //Accelerate/Surge
-    //    NAFFData[i] -= (sum_ef1/sum_ee1*cosine[i] + sum_ef2/sum_ee2*sine[i])*hanning[i];
+  
+  let term1 = zip(cosine, sine).map {$0 * (sum_ef1_r/sum_ee1) + $1 * (sum_ef2_r/sum_ee2)}
+  let term2 = zip(cosine, sine).map {$0 * (sum_ef1_i/sum_ee1) + $1 * (sum_ef2_i/sum_ee2)}
+
+  let term1win = zip(term1,hanning).map{$0 * $1}
+  let term2win = zip(term2,hanning).map{$0 * $1}
+  let newReal = zip(real, term1win).map{$0 - $1}
+  let newImag = zip(imag, term2win).map{$0 - $1}
     
-    let term1 = add(vsmul(cosine, sum_ef1_r/sum_ee1),vsmul(sine, sum_ef2_r/sum_ee2)) //Accelerate/Surge
-    let term2 = add(vsmul(cosine, sum_ef1_i/sum_ee1),vsmul(sine, sum_ef2_i/sum_ee2)) //Accelerate/Surge
-    //let term1 = vsmul(cosine, sum_ef1/sum_ee1) //Accelerate/Surge
-    //let term2 = vsmul(sine, sum_ef2/sum_ee2) //Accelerate/Surge
-    //let term2 = vsmul(sine, sum_ef2/sum_ee2) //Accelerate/Surge
-    //let term = mul(add(term1, term2), hanning) //Accelerate/Surge
-	let term1win = mul(term1,hanning)
-	let term2win = mul(term2,hanning)
-	let newReal = sub(real, term1win) //Accelerate/Surge
-	let newImag = sub(imag, term2win) //Accelerate/Surge
-    
-    let sum2 = (svesq(newReal)+svesq(newImag)) //Accelerate/Surge
+    let sum2 = zip(newReal, newImag).reduce(0.0, {$0 + $1.0*$1.0 + $1.1*$1.1})
     
     let significance = (sum1>0.0) ? (sum2/sum1) : (-1.0)
     
@@ -542,7 +541,7 @@ public func OneDParabolicOptimization(xGuess: Double, dx: Double, xLower: Double
 }
 
 
-public func performNAFF(data:[Double], cplxData:[Double]?=nil, dt: Double, nfreqs: Int, t0: Double, maxFrequencies: Int, fracRMSChangeLimit: Double, freqCycleLimit: Int, fracFreqAccuracyLimit: Double, lowerFreqLimit: Double,  upperFreqLimit: Double, weights inputweights: [Double]?/*vDSP_DFT_SetupD?*/ = nil, complex: Bool = false) -> (frequencies:[Double],amplitudes:[Double],phases:[Double],significances:[Double]) {
+public func performNAFF(data:[Double], cplxData:[Double]?=nil, dt: Double, nfreqs: Int, t0: Double, maxFrequencies: Int, fracRMSChangeLimit: Double, freqCycleLimit: Int, fracFreqAccuracyLimit: Double, lowerFreqLimit: Double,  upperFreqLimit: Double, complex: Bool = false) -> (frequencies:[Double],amplitudes:[Double],phases:[Double],significances:[Double]) {
 
 	//var cplx = false
     //if let cplxData = cplxData {
@@ -560,16 +559,20 @@ public func performNAFF(data:[Double], cplxData:[Double]?=nil, dt: Double, nfreq
 	//Windowing
 	var hanningwindow = hanning(points: origCount) //Accelerate/Surge
 	//Remove mean
-	let meanrealdata = Surge.mean(data) //Accelerate/Surge
+  let meanrealdata = data.reduce(0.0, {$0 + $1})/Double(data.count)
+  //Surge.mean(data) //Accelerate/Surge
 	let meanrealdatavec = [Double](repeating: meanrealdata, count: origCount)
-	let windowedRealData = submul(data, meanrealdatavec, hanningwindow) //Accelerate/Surge
+  let windowedRealData0 = zip(data, meanrealdatavec).lazy.map{$0 - $1}
+  let windowedRealData = zip(windowedRealData0, hanningwindow).map{$0 * $1}
 
 	var meancplxdata : Double
 	var windowedCplxData = [Double]()
 	if let cplxData = cplxData, complex == true {
-		meancplxdata = Surge.mean(cplxData)
+		meancplxdata = cplxData.reduce(0.0, {$0 + $1})/Double(cplxData.count)
 		let meancplxdatavec = [Double](repeating: meancplxdata, count: origCount)
-		windowedCplxData = submul(cplxData, meancplxdatavec, hanningwindow) //Accelerate/Surge
+		//windowedCplxData = submul(cplxData, meancplxdatavec, hanningwindow) //Accelerate/Surge
+    let windowedCplxData0 = zip(cplxData, meancplxdatavec).lazy.map{$0 - $1}
+    windowedCplxData = zip(windowedCplxData0, hanningwindow).map{$0 * $1}
 	}
     
 	//Padding
@@ -619,10 +622,11 @@ public func performNAFF(data:[Double], cplxData:[Double]?=nil, dt: Double, nfreq
 	var rmsOrig: Double
 	if (complex == true) {
 	//rmsOrig = sqrt((svesq(NAFFData)+svesq(NAFFCplxData))/Double(count)) //sum of squares //Accelerate/Surge
-		rmsOrig = sqrt((svesq(NAFFData)+svesq(NAFFCplxData))/Double(count)) //sum of squares //Accelerate/Surge
+		//rmsOrig = sqrt((svesq(NAFFData)+svesq(NAFFCplxData))/Double(count)) //sum of squares //Accelerate/Surge
+    rmsOrig = sqrt(zip(NAFFData, NAFFCplxData).reduce(0.0, {$0 + $1.0*$1.0 + $1.1 * $1.1})/Double(count))
 	} else
 	{
-		rmsOrig = sqrt(svesq(NAFFData)/Double(count)) //sum of squares //Accelerate/Surge
+    rmsOrig = sqrt(NAFFData.reduce(0.0, {$0 + $1*$1})/Double(count))
 	}
 	var rmsLast : Double = rmsOrig
 	
@@ -630,23 +634,15 @@ public func performNAFF(data:[Double], cplxData:[Double]?=nil, dt: Double, nfreq
 	let FFTFreqs = (complex == true) ? count: count/2+1
 	
 	var freqsFound : Int = 0
-	var weights: vDSP_DFT_SetupD?
-	
-	if (complex == true) {
-		weights = inputweights ?? vDSP_DFT_zop_CreateSetupD(nil, vDSP_Length(count), .FORWARD)
-	} else {
-		weights = inputweights ?? vDSP_DFT_zrop_CreateSetupD(nil, vDSP_Length(count), .FORWARD)
-	}
-	//print("INPUT")
-	//_ = zip(NAFFData,NAFFCplxData).map({print("\($0.0)\t\($0.1)")})
+
 	while(freqsFound < maxFrequencies){
-		var magnitude2 : [Double]
+		var magnitude2 : [Double]// = []
 		if (complex == true) {
-			magnitude2 = cplxfftmag(NAFFData, NAFFCplxData, weights: weights) //Accelerate/Surge
+      let cplx = zip(NAFFData, NAFFData).map{Complex(real: $0, imag: $1)}
+      magnitude2 = Fourier(cplx).map{$0.real*$0.real + $0.imag * $0.imag}
 		} else {
-			magnitude2 = realfftmag(NAFFData, weights: weights) //Accelerate/Surge
+      magnitude2 = Fourier(NAFFData).map{$0.real*$0.real + $0.imag * $0.imag}
 		}
-		//_ = magnitude2.map{print($0)}
 		var maxMag2 : Double = 0.0
 		var iBest : Int = 0
 		var ifreq_best = 0.0
@@ -754,10 +750,11 @@ public func performNAFF(data:[Double], cplxData:[Double]?=nil, dt: Double, nfreq
 		if (fracRMSChangeLimit > 0) {
 			/* determine if residual is too small to bother with */
 			if (complex == true) {
-				rmsNow = sqrt((/*Surge.*/svesq(NAFFData) +/*Surge.*/svesq(NAFFCplxData))/Double(count)) //Accelerate/Surge
+        rmsNow = sqrt(zip(NAFFData, NAFFCplxData).reduce(0.0, {$0 + $1.0*$1.0 + $1.1 * $1.1})/Double(count))
+				//rmsNow = sqrt((/*Surge.*/svesq(NAFFData) +/*Surge.*/svesq(NAFFCplxData))/Double(count)) //Accelerate/Surge
 
 			} else {
-				rmsNow = sqrt(/*Surge.*/svesq(NAFFData)/Double(count)) //Accelerate/Surge
+				rmsNow = sqrt(NAFFData.reduce(0.0, {$0 + $1*$1})/Double(count)) //sqrt(/*Surge.*/svesq(NAFFData)/Double(count)) //Accelerate/Surge
 
 			}
 			
@@ -796,11 +793,31 @@ public func performNAFF(data:[Double], cplxData:[Double]?=nil, dt: Double, nfreq
 	significances = Array([[0.0], significances].joined())
 	
 	let result : ([Double],[Double],[Double],[Double]) = (frequencies, amplitudes, phases, significances)
-	
-    if inputweights == nil {
-        //vDSP_DFT_DestroySetupD(weights)
-    }
-    
 	return result
 }
 
+public func nextDFTn(_ n: Int)-> Int {
+  
+  // calculate minimum necessary base 2 exponent
+  let minbase2 = Int(ceil(log2(Double(n))))
+  
+  var allowedDFTCases = [Int]()
+  
+  //if base2 < 4, only 2**base2 allowed (for zrop, 5)
+  
+  for i in 1..<5 {
+    allowedDFTCases.append(1<<i)
+  }
+  
+  //if base2 >= 4, valid cases also include multiples of 1, 3, 5, 15
+  if minbase2 >= 5 {
+    for i in 5...minbase2 {
+      let pow2 = 1<<i
+      allowedDFTCases.append(pow2)
+      allowedDFTCases.append(3*pow2)
+      allowedDFTCases.append(5*pow2)
+      allowedDFTCases.append(15*pow2)
+    }
+  }
+  return allowedDFTCases.sorted(by: {$0 < $1}).filter({$0 >= n}).first!
+}
