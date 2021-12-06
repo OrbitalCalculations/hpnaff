@@ -6,31 +6,56 @@
 //  Copyright (c) 2015 Heiko Pälike. All rights reserved.
 //
 
-import Cocoa
-#if canImport(Accelerate)
-	import Accelerate
-#endif
-import Surge
+import Foundation
+import DoggieMath
+import Numerics
+//#if canImport(Accelerate)
+//	import Accelerate
+//#endif
+//import Surge
 
+
+extension Array where Element: Real {
+  @inlinable
+  public func squared() -> Self {
+    return self.map { $0*$0 }
+  }
+}
+
+extension Real {
+  @inlinable
+  public func svesq(_ arg: [Double]) -> [Double] {
+    let sq = arg.squared()
+    let result = sq.sum()
+    return result
+  }
+}
+
+@inlinable
+@inlinable
+public func sincos(_ arg: [Double]) -> ([Double], [Double]) {
+  let sine = arg.map(sin)
+  let cosine = arg.map(cos)
+  return (sine, cosine)
+}
 
 func NAFFFunc(NAFFData : [Double], NAFFdt: Double, omega: Double)->Double{
-	let range = 0..<NAFFData.count
-	let omegaterm = range.map {Double($0)*omega*NAFFdt}
-	let (sine,cosine) = sincos(omegaterm) //Accelerate/Surge
-	let sum1 = sum(mul(cosine, NAFFData))
-	let sum2 = sum(mul(sine, NAFFData))
-	return sum1*sum1 + sum2*sum2
+	let range = 0 ..< NAFFData.count
+  let omegaterm = range.map { Double($0)*omega*NAFFdt }
+	let (sine, cosine) = sincos(omegaterm)
+  let sum1 = (cosine * NAFFData).sum()
+  let sum2 = (sine * NAFFData).sum()
+  return sum1.squared() + sum2.squared()
 }
 
 
 func NAFFFunc2(NAFFData : [Double], NAFFCplxData : [Double], NAFFdt: Double, omega: Double)->Double{
 	let range = 0..<NAFFData.count
-	let omegaterm = range.map {Double($0)*omega*NAFFdt}
-	let (sine,cosine) = sincos(omegaterm) //Accelerate/Surge
-	let sum1 = sum(mul(cosine, NAFFData)) + sum(mul(sine, NAFFCplxData))  //real
-	let sum2 = sum(mul(cosine, NAFFCplxData)) - sum(mul(sine, NAFFData))  //imag
-	//let sum = sum1_r+sum2_r+sum1_i+sum2_i
-	let result = sum1*sum1 + sum2*sum2
+  let omegaterm = range.map { Double($0)*omega*NAFFdt }
+  let (sine, cosine) = sincos(omegaterm)
+  let sum1 = (cosine * NAFFData).sum() + (sine * NAFFCplxData).sum() //real
+  let sum2 = (cosine * NAFFCplxData).sum() - (sine * NAFFData).sum() //imag
+  let result = sum1.squared() + sum2.squared()
 	return result
 }
 
@@ -40,13 +65,13 @@ public func sqr(x: Int)->Int{
 
 public func hanning(points: Int)->[Double]{
 	assert(points>1, "Error in Hanning Function: Number of points should be > 1")
-	#if canImport(Accelerate)
-		var result = [Double](repeating: 0.0, count: points)
-		vDSP_hann_windowD(&result,vDSP_Length(points),Int32(vDSP_HANN_DENORM))
-		return result
-	#else
-		return (0..<points).map{ (1.0 - cos(2.0*Double.pi*Double($0)/(Double(points))))/2.0 }
-	#endif
+	//#if canImport(Accelerate)
+	//var result = [Double](repeating: 0.0, count: points)
+	//vDSP_hann_windowD(&result,vDSP_Length(points),Int32(vDSP_HANN_DENORM))
+	//return result
+	//#else
+  return (0..<points).lazy.map{ (1.0 - cos(2.0*Double.pi*Double($0)/(Double(points))))/2.0 }
+	//#endif
 }
 
 public struct Hanning{
@@ -64,15 +89,11 @@ public struct Hanning{
 	}
 }
 
-
-
-
-
 public func adjustFrequencyHalfPlane(frequency: Double, phase0: Double, phase1: Double, dt: Double)->Double{
 	var phase0 : Double = phase0
 	var phase1 : Double = phase1
 	if (fabs(phase0-phase1)>Double.pi) {
-		if (phase0<phase1){
+		if (phase0 < phase1){
 			phase0 += Double.pi*2.0
 		}
 		else{
@@ -82,37 +103,41 @@ public func adjustFrequencyHalfPlane(frequency: Double, phase0: Double, phase1: 
 	if (phase0 < phase1){
 		return frequency
 	}
-	return 1.0/dt-frequency;
+	return 1.0/dt - frequency;
 }
 
-
-
-
-
-func CalculatePhaseAndAmplitudeFromFreq(hanning: [Double], data: [Double], nPoints: Int, dt: Double, frequency: Double, t0: Double)->(newData:[Double],amplitude:Double, phase:Double,significance:Double){
+func CalculatePhaseAndAmplitudeFromFreq(
+  hanning: [Double],
+  data: [Double],
+  nPoints: Int,
+  dt: Double,
+  frequency: Double,
+  t0: Double) ->
+    (newData:[Double], amplitude:Double, phase:Double, significance:Double) {
 	
 	assert (nPoints>1,"number of Points in CalculatePhaseAndAmplitudeFromFreq must be >1")
 	assert (nPoints == hanning.count,"number of hanning window points must equal data points")
 	
 	let freq0 : Double = frequency  // * 2.0 * M_PI
 	
-	let range = 0..<nPoints
-	let sincosarg = range.map {Double($0) * freq0 * dt}
-	let (sine, cosine) = sincos(sincosarg) //Accelerate/Surge
+	let range = 0 ..< nPoints
+  let sincosarg = range.map {Double($0) * freq0 * dt}
+	let (sine, cosine) = sincos(sincosarg)
 
-	let sum_ee1 = sum(mul(sqr(cosine),hanning)) //Accelerate/Surge
-	let sum_ee2 = sum(mul(sqr(sine), hanning)) //Accelerate/Surge
-    /* these are the overlap sums */
-    let sum_ef1 = sum(mul(cosine, data)) //Accelerate/Surge
-	let sum_ef2 = sum(mul(sine, data)) //Accelerate/Surge
+  let sum_ee1 = (sqrt(cosine) * hanning).sum()
+  let sum_ee2 = (sqrt(  sine) * hanning).sum()
+  
+      /* these are the overlap sums */
+  let sum_ef1 = (cosine * data).sum()
+  let sum_efs = (sine   * data).sum()
 	
 	let sum1 = svesq(data) //Accelerate/Surge
     //    NAFFData[i] -= (sum_ef1/sum_ee1*cosine[i] + sum_ef2/sum_ee2*sine[i])*hanning[i];
 
-	let term1 = vsmul(cosine, sum_ef1/sum_ee1) //Accelerate/Surge
-	let term2 = vsmul(sine, sum_ef2/sum_ee2) //Accelerate/Surge
-	let term = mul(add(term1, term2), hanning) //Accelerate/Surge
-	let newData = sub(data, term) //Accelerate/Surge
+      let term1 = cosine .* (sum_ef1/sum_ee1) //vsmul(cosine, sum_ef1/sum_ee1) //Accelerate/Surge
+	let term2 = sine   * (sum_ef2/sum_ee2) //vsmul(sine, sum_ef2/sum_ee2) //Accelerate/Surge
+	let term = (term1 + term2) * hanning // mul(add(term1, term2), hanning) //Accelerate/Surge
+	let newData = data - term //sub(data, term) //Accelerate/Surge
 	
 	let sum2 = svesq(newData) //Accelerate/Surge
 	
@@ -120,7 +145,7 @@ func CalculatePhaseAndAmplitudeFromFreq(hanning: [Double], data: [Double], nPoin
 	
 	let freq0_2 = frequency / (Double.pi*2.0)
 	
-	let amplitude : Double = sqrt(pow(sum_ef1/sum_ee1,2.0)+pow(sum_ef2/sum_ee2,2.0))
+	let amplitude : Double = sqrt(pow(sum_ef1/sum_ee1, 2.0) + pow(sum_ef2/sum_ee2, 2.0))
 	/* compute the phase and ensure that it is in the range [-PI, PI] */
 	var phase = fmod(atan2(-sum_ef2/sum_ee2, sum_ef1/sum_ee1) +
 		freq0_2*t0*Double.pi*2.0, Double.pi * 2.0);
@@ -146,21 +171,26 @@ func CalculatePhaseAndAmplitudeFromFreqCplx2(hanning: [Double], real: [Double], 
 	let (sine, cosine) = sincos(sincosarg) //Accelerate/Surge
 
 	/* this gives normalization of the overlap sums */
-	let sum_ee1 = sum(mul(sqr(cosine),hanning)) //Accelerate/Surge
-	let sum_ee2 = sum(mul(sqr(sine), hanning)) //Accelerate/Surge
+  let sum_ee1 = (sqrt(cosine) * hanning).sum() //sum(mul(sqr(cosine),hanning)) //Accelerate/Surge
+	let sum_ee2 = (sqrt(sine  ) * hanning).sum() //sum(mul(sqr(sine), hanning)) //Accelerate/Surge
 	
-	let sum_ef1 = sum(mul(cosine, real)) + sum(mul(sine, imag))
-	let sum_ef2 = sum(mul(cosine, imag)) - sum(mul(sine, real))
+  let sum_ef1 = (cosine * real).sum() + (sine * imag).sum()
+  let sum_ef2 = (cosine * imag).sum() - (sine * real).sum()
+	//let sum_ef1 = sum(mul(cosine, real)) + sum(mul(sine, imag))
+	//let sum_ef2 = sum(mul(cosine, imag)) - sum(mul(sine, real))
 	
 	let sum1 = (svesq(real)+svesq(imag)) //Accelerate/Surge
 	//    NAFFData[i] -= (sum_ef1/sum_ee1*cosine[i] + sum_ef2/sum_ee2*sine[i])*hanning[i];
 	
-	let term1 = add(vsmul(cosine, sum_ef1/sum_ee1),vsmul(sine, sum_ef1/sum_ee2)) //Accelerate/Surge
-	let term2 = sub(vsmul(cosine, sum_ef2/sum_ee2),vsmul(sine, sum_ef2/sum_ee2)) //Accelerate/Surge
-	let term1win = mul(term1,hanning)
-	let term2win = mul(term2,hanning)
-	let newReal = sub(real, term1win) //Accelerate/Surge
-	let newImag = sub(imag, term2win) //Accelerate/Surge
+  let term1 = cosine * (sum_ef1/sum_ee1) + sine * (sum_ef1/sum_ee1)
+  let term2 = cosine * (sum_ef2/sum_ee2) - sine * (sum_ef2/sum_ee2)
+
+	//let term1 = add(vsmul(cosine, sum_ef1/sum_ee1),vsmul(sine, sum_ef1/sum_ee2)) //Accelerate/Surge
+	//let term2 = sub(vsmul(cosine, sum_ef2/sum_ee2),vsmul(sine, sum_ef2/sum_ee2)) //Accelerate/Surge
+	let term1win = term1 * hanning //mul(term1,hanning)
+	let term2win = term2 * hanning //mul(term2,hanning)
+	let newReal = real - term1win //Accelerate/Surge
+	let newImag = imag - term2win //Accelerate/Surge
 	
 	let sum2 = (svesq(newReal)+svesq(newImag)) //Accelerate/Surge
 	
@@ -512,7 +542,7 @@ public func OneDParabolicOptimization(xGuess: Double, dx: Double, xLower: Double
 }
 
 
-public func performNAFF(data:[Double], cplxData:[Double]?=nil, dt: Double, nfreqs: Int, t0: Double, maxFrequencies: Int, fracRMSChangeLimit: Double, freqCycleLimit: Int, fracFreqAccuracyLimit: Double, lowerFreqLimit: Double,  upperFreqLimit: Double, weights inputweights: vDSP_DFT_SetupD? = nil, complex: Bool = false) -> (frequencies:[Double],amplitudes:[Double],phases:[Double],significances:[Double]) {
+public func performNAFF(data:[Double], cplxData:[Double]?=nil, dt: Double, nfreqs: Int, t0: Double, maxFrequencies: Int, fracRMSChangeLimit: Double, freqCycleLimit: Int, fracFreqAccuracyLimit: Double, lowerFreqLimit: Double,  upperFreqLimit: Double, weights inputweights: [Double]?/*vDSP_DFT_SetupD?*/ = nil, complex: Bool = false) -> (frequencies:[Double],amplitudes:[Double],phases:[Double],significances:[Double]) {
 
 	//var cplx = false
     //if let cplxData = cplxData {
@@ -724,10 +754,10 @@ public func performNAFF(data:[Double], cplxData:[Double]?=nil, dt: Double, nfreq
 		if (fracRMSChangeLimit > 0) {
 			/* determine if residual is too small to bother with */
 			if (complex == true) {
-				rmsNow = sqrt((Surge.svesq(NAFFData)+Surge.svesq(NAFFCplxData))/Double(count)) //Accelerate/Surge
+				rmsNow = sqrt((/*Surge.*/svesq(NAFFData) +/*Surge.*/svesq(NAFFCplxData))/Double(count)) //Accelerate/Surge
 
 			} else {
-				rmsNow = sqrt(Surge.svesq(NAFFData)/Double(count)) //Accelerate/Surge
+				rmsNow = sqrt(/*Surge.*/svesq(NAFFData)/Double(count)) //Accelerate/Surge
 
 			}
 			
@@ -768,7 +798,7 @@ public func performNAFF(data:[Double], cplxData:[Double]?=nil, dt: Double, nfreq
 	let result : ([Double],[Double],[Double],[Double]) = (frequencies, amplitudes, phases, significances)
 	
     if inputweights == nil {
-        vDSP_DFT_DestroySetupD(weights)
+        //vDSP_DFT_DestroySetupD(weights)
     }
     
 	return result

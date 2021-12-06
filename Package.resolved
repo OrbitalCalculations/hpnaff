@@ -1,0 +1,88 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "brotli",
+        "repositoryURL": "https://github.com/SusanDoggie/brotli",
+        "state": {
+          "branch": null,
+          "revision": "e8fe15deb127b07b1eda65854bde688c3f3415f6",
+          "version": "1.0.3"
+        }
+      },
+      {
+        "package": "Doggie",
+        "repositoryURL": "https://github.com/SusanDoggie/Doggie.git",
+        "state": {
+          "branch": null,
+          "revision": "de394b7a89767a61b60fd887a0bcc6d471c3f004",
+          "version": "6.6.1"
+        }
+      },
+      {
+        "package": "Float16",
+        "repositoryURL": "https://github.com/SusanDoggie/Float16",
+        "state": {
+          "branch": null,
+          "revision": "d9228a7b0a78eaaa55934f56a1c981efeb3b8ec7",
+          "version": "1.1.0"
+        }
+      },
+      {
+        "package": "libjpeg",
+        "repositoryURL": "https://github.com/SusanDoggie/libjpeg",
+        "state": {
+          "branch": null,
+          "revision": "26649717b522caf3d0c70ceba28ce31066b79e26",
+          "version": "1.0.3"
+        }
+      },
+      {
+        "package": "libwebp",
+        "repositoryURL": "https://github.com/SusanDoggie/libwebp",
+        "state": {
+          "branch": null,
+          "revision": "f84f2319abeaaf2bed7fc25e248cc53edb1a5066",
+          "version": "1.0.3"
+        }
+      },
+      {
+        "package": "Rainbow",
+        "repositoryURL": "https://github.com/onevcat/Rainbow",
+        "state": {
+          "branch": null,
+          "revision": "e0dada9cd44e3fa7ec3b867e49a8ddbf543e3df3",
+          "version": "4.0.1"
+        }
+      },
+      {
+        "package": "swift-algorithms",
+        "repositoryURL": "https://github.com/apple/swift-algorithms",
+        "state": {
+          "branch": null,
+          "revision": "b14b7f4c528c942f121c8b860b9410b2bf57825e",
+          "version": "1.0.0"
+        }
+      },
+      {
+        "package": "swift-collections",
+        "repositoryURL": "https://github.com/apple/swift-collections",
+        "state": {
+          "branch": null,
+          "revision": "48254824bb4248676bf7ce56014ff57b142b77eb",
+          "version": "1.0.2"
+        }
+      },
+      {
+        "package": "swift-numerics",
+        "repositoryURL": "https://github.com/apple/swift-numerics",
+        "state": {
+          "branch": null,
+          "revision": "0a5bc04095a675662cf24757cc0640aa2204253b",
+          "version": "1.0.2"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
