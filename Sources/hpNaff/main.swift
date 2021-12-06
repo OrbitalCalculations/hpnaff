@@ -8,10 +8,12 @@
 
 import Foundation
 import Accelerate
-import Surge
+//import Surge
 //import CommandLineKit
 import Rainbow
 //import Upsurge
+//import Numerics
+
 
 let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
 let version2 = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "unknown"
@@ -285,8 +287,8 @@ do {
 	errorptr?.pointee = error
 }
 
-let filterLower : Double = filterAbscissaLower.value ?? min(time)
-let filterUpper : Double = filterAbscissaUpper.value ?? max(time)
+let filterLower : Double = filterAbscissaLower.value ?? time.min() ?? 0.0
+let filterUpper : Double = filterAbscissaUpper.value ?? time.max() ?? 0.0 //max(time)
 
 let startIndex1 = time.firstIndex(where: {$0 >= filterLower})
 let startIndex2 = time.lastIndex(where: {$0 <= filterLower})
@@ -332,8 +334,8 @@ if (complex == true) { cplxdata =  Array(cplxdata[lowerIndex...upperIndex]) }
 if detrendChunks == false {
 	if let detrendOrder = detrending_option.value {
 		if (complex == true) {
-			let (realresult,realcoefficients) =  detrend(data, degree: detrendOrder)//detrend(real: data, imag: cplxdata, degree: detrendOrder)
-			let (imagresult,imagcoefficients) =  detrend(cplxdata, degree: detrendOrder)//detrend(real: data, imag: cplxdata, degree: detrendOrder)
+      let (realresult,realcoefficients) =  (data, [1.0]) //TODO: implement detrend(data, degree: detrendOrder)//detrend(real: data, imag: cplxdata, degree: detrendOrder)
+      let (imagresult,imagcoefficients) =  (data, [1.0]) //TODO: implement detrend(cplxdata, degree: detrendOrder)//detrend(real: data, imag: cplxdata, degree: detrendOrder)
 			
 			data = realresult
 			cplxdata = imagresult
@@ -342,7 +344,7 @@ if detrendChunks == false {
 			
 		}
 		else {
-			let (detrendedSignal, coefficients) = detrend(data, degree: detrendOrder)
+			let (detrendedSignal, coefficients) = (data, [1.0]) //TODO: implement detrend(data, degree: detrendOrder)
 			hpNAFFLog("Detrending coefficients order (high to low) \(detrendOrder) : \(coefficients)", messageKind: .info, verbosity: verbosity.value)
 			data = detrendedSignal
 		}
@@ -398,11 +400,11 @@ if (complex == true) {
 let numberChunks = dataArrays.count
 
 let maxSize = dataArrays.map{ $0.count }.max() ?? 0
-var weights: vDSP_DFT_SetupD?
+var weights: [Double] //vDSP_DFT_SetupD?
 
 
-let realweights = vDSP_DFT_zrop_CreateSetupD(nil, vDSP_Length(maxSize), .FORWARD)
-let cplxWeights = vDSP_DFT_zop_CreateSetupD(weights, vDSP_Length(maxSize), .FORWARD)
+let realweights = [Double]() //TODO: vDSP_DFT_zrop_CreateSetupD(nil, vDSP_Length(maxSize), .FORWARD)
+let cplxWeights = [Double]() //TODO: vDSP_DFT_zop_CreateSetupD(weights, vDSP_Length(maxSize), .FORWARD)
 if (complex == true) {
 	weights = cplxWeights
 } else {
@@ -417,12 +419,12 @@ for chunk in 0..<numberChunks {
 		if (detrendOrder == nil) {
 			hpNAFFLog("Detrending coefficients order not set, using default of 0", messageKind: .warn, verbosity: verbosity.value)
 		}
-		let (detrendedSignal, coefficients) = detrend(dataArrays[chunk], degree: detrendOrder ?? 0)
+    let (detrendedSignal, coefficients) = (dataArrays[chunk],[1.0]) //TODO: implement detrend(dataArrays[chunk], degree: detrendOrder ?? 0)
 		hpNAFFLog("Chunk #\(chunk), detrending coefficients order \(detrendOrder ?? 0) : \(coefficients)", messageKind: .info, verbosity: verbosity.value)
 		localData = detrendedSignal
 		localCplxData = detrendedSignal
 		if (complex == true) {
-			let (detrendedImagSignal, imagCoefficients) = detrend(cplxDataArrays[chunk], degree: detrendOrder ?? 0)
+      let (detrendedImagSignal, imagCoefficients) = (cplxDataArrays[chunk], [1.0]) //TODO: detrend(cplxDataArrays[chunk], degree: detrendOrder ?? 0)
 			hpNAFFLog("Chunk #\(chunk), detrending coefficients (IMAG) order \(detrendOrder ?? 0) : \(imagCoefficients)", messageKind: .info, verbosity: verbosity.value)
 			localCplxData = detrendedImagSignal
 		}
@@ -457,19 +459,23 @@ for chunk in 0..<numberChunks {
 	let separatorline = [String](repeating:"=",count:headerstr1.count).joined(separator: "").blue
 	print(separatorline)
 	print(headerstr)
-	
+    let indices = 0..<count
+        /*zip(0..<count, freq).sorted { (lhs: (Int, Double), rhs: (Int, Double)) -> Bool in
+        return rhs.1 > lhs.1
+    }.map{$0.0}*/
+    
 	for i in 0..<count {
 		let chunkstr = String(format:"% 5d",chunk)
 		let timestr = String(format:"% 14.4f",t0)
 		let pointsstr = String(format:"% 6d",localData.count) //points
-		let index = String(format:"% 5d",i)
-		let f = String(format:"% 011.9f",freq[i])
-		let a = String(format:"%  13.8f",ampl[i])
-		let p = String(format:"% 011.9f",phase[i])
-		let s = String(format:"% 011.9f",sig[i])
-		let per = String(format:"% 12.7f",1.0/freq[i])
-		let arcsec = String(format:"% 12.7f",360.0*3.600*freq[i])
-		let pdeg = String(format:"% 12.7f",phase[i]*180.0/Double.pi)
+		let index = String(format:"% 5d",indices[i])
+		let f = String(format:"% 011.9f",freq[indices[i]])
+		let a = String(format:"%  13.8f",ampl[indices[i]])
+		let p = String(format:"% 011.9f",phase[indices[i]])
+		let s = String(format:"% 011.9f",sig[indices[i]])
+		let per = String(format:"% 12.7f",1.0/freq[indices[i]])
+		let arcsec = String(format:"% 12.7f",360.0*3.600*freq[indices[i]])
+		let pdeg = String(format:"% 12.7f",phase[indices[i]]*180.0/Double.pi)
 		
 		print(index,chunkstr,timestr,pointsstr,f, a, p, s,per, arcsec,pdeg, separator:" | ")
 	}
@@ -514,4 +520,4 @@ for chunk in 0..<numberChunks {
 	}
 }
 
-vDSP_DFT_DestroySetupD(weights)
+//vDSP_DFT_DestroySetupD(weights)

@@ -111,7 +111,7 @@
 		424C4EF8222D3C91004A4660 /* StringExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
 		424C4F04222D3D06004A4660 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		424C4F06222D3D0B004A4660 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
-		424C4F0A222D3E94004A4660 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		424C4F0A222D3E94004A4660 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../../../../Desktop/Info.plist; sourceTree = "<group>"; };
 		424C4F24222D4536004A4660 /* hpnaff-BridgingHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "hpnaff-BridgingHeader.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -536,7 +536,7 @@
 				OTHER_LDFLAGS = "-Wl,-sectcreate,__TEXT,__info_plist,Info.plist";
 				PRODUCT_BUNDLE_IDENTIFIER = org.palaeowiggles.hpnaff;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_FORCE_STATIC_LINK_STDLIB = YES;
+				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
 				SWIFT_OBJC_BRIDGING_HEADER = "hpnaff-BridgingHeader.h";
 				SWIFT_VERSION = 5.0;
 			};
@@ -558,7 +558,7 @@
 				OTHER_LDFLAGS = "-Wl,-sectcreate,__TEXT,__info_plist,Info.plist";
 				PRODUCT_BUNDLE_IDENTIFIER = org.palaeowiggles.hpnaff;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_FORCE_STATIC_LINK_STDLIB = YES;
+				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
 				SWIFT_OBJC_BRIDGING_HEADER = "hpnaff-BridgingHeader.h";
 				SWIFT_VERSION = 5.0;
 			};
