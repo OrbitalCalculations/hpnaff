@@ -8,10 +8,11 @@
 
 #ifndef hpnaff_BridgingHeader_h
 #define hpnaff_BridgingHeader_h
-#import "Vendor/Surge/Sources/Surge/HP/MTRandom.h"
-#import "Vendor/Rainbow/Sources/Rainbow.h"
+//#import "Vendor/Surge/Sources/Surge/HP/MTRandom.h"
+//#import "Vendor/Rainbow/Sources/Rainbow.h"
 #endif /* hpnaff_BridgingHeader_h */
 
+/*
 #import <mach-o/dyld.h>
 #import <mach-o/loader.h>
 
@@ -47,3 +48,4 @@ static NSUUID *ExecutableUUID(void)
     return nil;
 }
 
+*/

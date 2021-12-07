@@ -91,18 +91,18 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "/Users/wiggles/Developer_Disk/nonApple/hpNAFF/hpnaff/hpnaff/etp_1kyr_36Ma.txt"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "/Users/wiggles/Developer_Disk/nonApple/hpNAFF_public/tst2.txt"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-vvv"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-d 1"
+            argument = "-d 0"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

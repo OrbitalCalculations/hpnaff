@@ -133,6 +133,10 @@ let detrendChunks : Bool = detrending_option2.value
 let complex : Bool = complex_option.value
 let decimate = decimate_option.value ?? kDecimate
 
+if let detrendOrder = detrendOrder,
+    detrendOrder > 5 {
+  fatalError("Error: order for detrending should be <= 5 but is \(detrendOrder)")
+}
 
 let columnSeparator = columnSeparator_option.value ?? kcolumnSeparator
 let skipHeaderLines = skipHeaderLines_option.value ?? kskipHeaderLines
