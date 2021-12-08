@@ -6,6 +6,9 @@ import PackageDescription
 let package = Package(
     name: "hpNaff",
     platforms: [.macOS(.v11)],
+    products: [
+      .executable(name: "hpnaff", targets: ["hpNaff"])
+    ],
     dependencies: [
       //.package(url: "https://github.com/Jounce/Surge.git", .upToNextMajor(from: "2.3.2")),
       .package(url: "https://github.com/onevcat/Rainbow", .upToNextMajor(from: "4.0.0")),
