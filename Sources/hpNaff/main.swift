@@ -7,17 +7,11 @@
 //
 
 import Foundation
-import Accelerate
-//import Surge
-//import CommandLineKit
 import Rainbow
-//import Upsurge
-//import Numerics
-
 
 let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
 let version2 = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "unknown"
-hpNAFFLog(("Welcome to hpNAFF Analysis".green.bold + "(version \(version.red), build \(version2.red)).").blue.bold + " ©2015-2019 Heiko Pälike. 3rd party licenses: see --licenses option")
+hpNAFFLog(("Welcome to hpNAFF Analysis".green.bold + "(version \(version.red), build \(version2.red)).").blue.bold + " ©2015-2021 Heiko Pälike. 3rd party licenses: see --licenses option")
 
 // MARK: Defaults
 let kDecimate = 1
