@@ -322,7 +322,7 @@ public func OneDParabolicOptimization(xGuess: Double, dx: Double, xLower: Double
 	yReturn = maxFactor * f0
 	
 	/* find direction in which function decreases */
-	var endCycle : Int = 0
+	//var endCycle : Int = 0
 	for cycle in 0..<(2*maxCycles){
 
 		// let endCycle = cycle
@@ -613,7 +613,7 @@ public func performNAFF(data:[Double], cplxData:[Double]?=nil, dt: Double, nfreq
 	var significances = [Double](repeating:-1.0, count: maxFrequencies)
 	//var residual = [Double](repeating:0.0, count: count)
 	
-	var NAFFdt : Double = dt //* Double(origCount-1)/Double(count-1)
+	let NAFFdt : Double = dt //* Double(origCount-1)/Double(count-1)
 	
 	let freqSpacing = 1.0/(Double(count)*dt)
 	
