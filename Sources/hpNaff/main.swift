@@ -182,7 +182,7 @@ enum hpNAFFError: Error {
 // MARK: Data reading
 let inputurl = URL(fileURLWithPath: fileName)
 //let data = NSData(contentsOfURL: inputurl)
-var errorptr: NSErrorPointer = nil
+//var errorptr: NSErrorPointer = nil
 
 var time = [Double]()
 var data = [Double]()
@@ -282,7 +282,8 @@ do {
 	hpNAFFLog("read \(count) lines", messageKind: .info, verbosity: verbosity.value)
 	
 } catch let error as NSError {
-	errorptr?.pointee = error
+	print(error) ///
+  //errorptr?.pointee = error
 }
 
 let filterLower : Double = filterAbscissaLower.value ?? time.min() ?? 0.0
