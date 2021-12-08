@@ -2,51 +2,6 @@
   "object": {
     "pins": [
       {
-        "package": "brotli",
-        "repositoryURL": "https://github.com/SusanDoggie/brotli",
-        "state": {
-          "branch": null,
-          "revision": "e8fe15deb127b07b1eda65854bde688c3f3415f6",
-          "version": "1.0.3"
-        }
-      },
-      {
-        "package": "Doggie",
-        "repositoryURL": "https://github.com/SusanDoggie/Doggie.git",
-        "state": {
-          "branch": null,
-          "revision": "de394b7a89767a61b60fd887a0bcc6d471c3f004",
-          "version": "6.6.1"
-        }
-      },
-      {
-        "package": "Float16",
-        "repositoryURL": "https://github.com/SusanDoggie/Float16",
-        "state": {
-          "branch": null,
-          "revision": "d9228a7b0a78eaaa55934f56a1c981efeb3b8ec7",
-          "version": "1.1.0"
-        }
-      },
-      {
-        "package": "libjpeg",
-        "repositoryURL": "https://github.com/SusanDoggie/libjpeg",
-        "state": {
-          "branch": null,
-          "revision": "26649717b522caf3d0c70ceba28ce31066b79e26",
-          "version": "1.0.3"
-        }
-      },
-      {
-        "package": "libwebp",
-        "repositoryURL": "https://github.com/SusanDoggie/libwebp",
-        "state": {
-          "branch": null,
-          "revision": "f84f2319abeaaf2bed7fc25e248cc53edb1a5066",
-          "version": "1.0.3"
-        }
-      },
-      {
         "package": "Rainbow",
         "repositoryURL": "https://github.com/onevcat/Rainbow",
         "state": {

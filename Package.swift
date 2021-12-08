@@ -1,5 +1,4 @@
 // swift-tools-version:5.5
-// The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
@@ -10,13 +9,10 @@ let package = Package(
       .executable(name: "hpnaff", targets: ["hpNaff"])
     ],
     dependencies: [
-      //.package(url: "https://github.com/Jounce/Surge.git", .upToNextMajor(from: "2.3.2")),
       .package(url: "https://github.com/onevcat/Rainbow", .upToNextMajor(from: "4.0.0")),
-      .package(url: "https://github.com/SusanDoggie/Doggie.git", .upToNextMajor(from: "6.6.1")),
       .package(url: "https://github.com/apple/swift-numerics", from: "1.0.0"),
-
-        // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
+      .package(url: "https://github.com/apple/swift-algorithms", from: "1.0.0"),
+      .package(url: "https://github.com/apple/swift-collections", from: "1.0.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -24,9 +20,10 @@ let package = Package(
         .executableTarget(
             name: "hpNaff",
             dependencies: [
-              "Rainbow", /*"Surge",*/
-              .product(name: "DoggieMath", package: "Doggie"),
+              "Rainbow",
               .product(name: "Numerics", package: "swift-numerics"),
+              .product(name: "Algorithms", package: "swift-algorithms"),
+              .product(name: "Collections", package: "swift-collections"),
             ],
             resources: [
               .process("Resources")

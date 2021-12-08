@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import DoggieMath
+//import DoggieMath
 import Numerics
 //#if canImport(Accelerate)
 //	import Accelerate
@@ -403,9 +403,9 @@ public func OneDParabolicOptimization(xGuess: Double, dx: Double, xLower: Double
 		swap(&f0, &f2)
 	}
 	/* now f0 > f1 and f2 > f1 */
-	endCycle = 0
-	for cycle in 0..<maxCycles {
-		endCycle = cycle
+	//endCycle = 0
+	for _ in 0..<maxCycles {
+		//endCycle = cycle
 		var x3,f3 : Double
 		#if DEBUG
 			//print("Cycle \(cycle):  f(\(x0))=\(f0),  f(\(x1))=\(f1),  f(\(x2))=\(f2)")
