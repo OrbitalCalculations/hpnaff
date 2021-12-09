@@ -330,7 +330,11 @@ public func log(_ c: Complex) -> Complex {
 @inlinable
 @inline(__always)
 public func log10(_ c: Complex) -> Complex {
+#if !os(Windows)
     return log(c) / M_LN10
+  #else
+  return log(c) / 2.302585092994046
+  #endif
 }
 
 @inlinable

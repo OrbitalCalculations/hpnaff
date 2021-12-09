@@ -15,21 +15,21 @@ final class hpNaffTests: XCTestCase {
         // Mac Catalyst won't have `Process`, but it is supported for executables.
         #if !targetEnvironment(macCatalyst)
 
-        let fooBinary = productsDirectory.appendingPathComponent("hpNaff")
+        //let fooBinary = productsDirectory.appendingPathComponent("hpNaff")
 
-        let process = Process()
-        process.executableURL = fooBinary
+        //let process = Process()
+        //process.executableURL = fooBinary
 
-        let pipe = Pipe()
-        process.standardOutput = pipe
+        //let pipe = Pipe()
+        //process.standardOutput = pipe
 
-        try process.run()
-        process.waitUntilExit()
+        //try process.run()
+        //process.waitUntilExit()
 
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        let output = String(data: data, encoding: .utf8)
+        //let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        //let output = String(data: data, encoding: .utf8)
 
-        XCTAssertEqual(output, "Hello, world!\n")
+        //XCTAssertEqual(output, "Hello, world!\n")
         #endif
     }
 

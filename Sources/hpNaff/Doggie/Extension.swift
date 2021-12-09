@@ -75,11 +75,11 @@ extension Double: ScalarProtocol {
     
 }
 
-extension CGFloat: ScalarProtocol {
-    
-    public typealias Scalar = CGFloat
-    
-}
+//extension CGFloat: ScalarProtocol {
+//
+//    public typealias Scalar = CGFloat
+//
+//}
 
 extension Complex {
     
