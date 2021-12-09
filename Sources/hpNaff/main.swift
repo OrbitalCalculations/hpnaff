@@ -90,7 +90,11 @@ do {
 } catch {
 	//cli.printUsage(error)
 	cli.printCustomUsage("Usage: hpnaff [options] file\nfile format: tab separated columns, data must be equidistantly spaced.  Instead of file can specify '-' for stdin.")
+  #if os(Windows)
+  exit(64)
+  #else
 	exit(EX_USAGE)
+  #endif
 }
 
 if help_option.wasSet {
