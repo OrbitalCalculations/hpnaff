@@ -5,7 +5,7 @@ A little command line tool (macOS, Linux, Windows[^1]) to perform high-resolutio
 
 Pre-compiled binaries are available [here](https://paloz.marum.de/bitbucket/projects/ESSP/repos/hpnaff/browse/Binaries)
 
-For macOS: after download, open the disk image (double click) and copy 'hpnaff' to a location in your search path, and  add execute permissions by 'chmod a+x ./hpnaff'
+For macOS: after download, copy 'hpnaff' to a location in your search path, and  add execute permissions by 'chmod a+x ./hpnaff; cp hpnaff /usr/local/bin' 
 
 [^1]: Windows version requires installation of [Windows Swift Toolchain](https://www.swift.org/download/)
 
@@ -160,4 +160,33 @@ user$ ./hpnaff etp_1kyr_36Ma.txt -d 1 -m 75
    74 |     0 |         0.0000 |  14001 |  0.018373301 |    0.04170326 |  4.267372537 |  0.976418419 |    54.42680232 |   23.8117976 |  244.5024360
    75 |     0 |         0.0000 |  14001 |  0.016041231 |    0.04508949 |  2.028721000 |  0.980103195 |    62.33935561 |   20.7894353 |  116.2371511
    ```
-   
+
+## Notes
+"Evolutive" outputs can be obtained with the -s option, e.g. -s 1000 computes an analysis for every 1000 points.
+
+Source code available at repository below.
+Note: There are three branches, "main" contains a new swift package manager version, which can also be compiled for Linux/Windows, and "Accelerate" whichh uses the LinearAlgebra system library. The Linux version is linked statically. The "Windows" branch is modified to enable compilation with the Windows Toolchain [^1]
+
+https://paloz.marum.de/bitbucket/scm/essp/hpnaff.git
+
+
+Notes: 
+This is a Swift implementation of 
+https://ops.aps.anl.gov/manuals/SDDStoolkit/SDDStoolkitsu61.html
+Related efforts:
+https://github.com/MichaelEhrlichman/FortNAFF
+https://github.com/adrn/SuperFreq
+https://github.com/nkarast/PyNAFF
+
+## References
+References:
+1. Laskar, J., 1990, The chaotic motion of the Solar System. A numerical estimate of the size of the chaotic zones, Icarus, 88, 266-291.
+2. Laskar, J., 1993, Frequency analysis for multi-dimensional systems. Global dynamics and diffusion, Physica D, 67, 257-281.
+3. Dumas, S., Laskar, J., 1993, Global Dynamics and Long-Time Stability in Hamiltonian Systems Via Numerical Frequency Analysis, Phys. Rev. Letters, 70 (20), 2975-2979.
+4. Laskar, J. : 1999, Introduction to frequency map analysis, in proc. of NATO ASI 533 3DHAM95, S'Agaro, Spain, 134150.
+5. Papaphilippou, Y., Frequency maps for LHC models, PAC99.
+6. Papahilippou, Y. Zimmermann, F., Weak-strong beam-beam simulations for the Large Hadron Collider, Phys. Rev. ST Accel.
+Beams 2, 104001 (1999).
+7. Robin, D., Steir, C., Laskar, J., Nadolski, L. : 2000, Global dynamics of the ALS revealed through experimental Frequency Map Analysis, Phys. Rev. Let., 85, pp. 558-561.
+8. Laskar, J., Frequency map analysis and quasiperiodic decompositions. preprint (https://arxiv.org/pdf/math/0305364.pdf) (2003).
+9. [Valluri & Merritt, 1998](http://iopscience.iop.org/article/10.1086/306269/fulltext/37764.text.html#sc2)
