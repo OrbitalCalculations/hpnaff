@@ -6,6 +6,7 @@ A little command line tool (macOS, Linux, Windows[^1]) to perform high-resolutio
 Pre-compiled binaries are available [here](https://paloz.marum.de/bitbucket/projects/ESSP/repos/hpnaff/browse/Binaries)
 
 For macOS: after download, copy 'hpnaff' to a location in your search path, and  add execute permissions by 'chmod a+x ./hpnaff; cp hpnaff /usr/local/bin' 
+Then try it on an [example file](https://paloz.marum.de/confluence/download/attachments/30048264/etp_1kyr_36Ma.txt?version=1&modificationDate=1551703946466&api=v2) that contains a weighted mix of Earth's orbital eccentricity, obliquity and climatic precession.
 
 [^1]: Windows version requires installation of [Windows Swift Toolchain](https://www.swift.org/download/)
 
