@@ -1,4 +1,5 @@
 # hpNaff
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5780014.svg)](https://doi.org/10.5281/zenodo.5780014)
 
 ## Numerical Analysis of Fundamental Frequencies (NAFF)
 A little command line tool (macOS, Linux, Windows[^1]) to perform high-resolution frequency analysis of time series following the Laskar method.
